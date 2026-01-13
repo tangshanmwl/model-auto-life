@@ -1,0 +1,63 @@
+name: Auto Chat
+
+on:
+  schedule:
+    # UTC 0, 6, 12 corresponds to Beijing 8, 14, 20
+    - cron: '0 0,6,12 * * *'
+  workflow_dispatch:
+
+jobs:
+  chat:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Auto Chat Script
+        env:
+          API_CONFIGS: ${{ secrets.API_CONFIGS }}
+          API_URL: ${{ secrets.API_URL }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME }}
+        run: python main.py
+
+      - name: Debug log and git status
+        run: |
+          pwd
+          ls -la
+          if [ -f log.txt ]; then
+            echo "===== log.txt tail ====="
+            tail -n 40 log.txt
+          else
+            echo "log.txt not found in workspace"
+          fi
+          echo "===== git status (porcelain) ====="
+          git status --porcelain
+
+      - name: Commit and push logs
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git diff --staged --stat
+            git commit -m "Update log.txt [skip ci]"
+            git pull --rebase
+            git push
+          fi
