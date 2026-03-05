@@ -632,3 +632,7 @@ The final answer is: $\boxed{35}$
 请求内容：99+73等于多少
 请求结果：Request failed. Status: 429. Response: {"error":{"message":"Provider returned error","type":"upstream_error","param":"","code":429}}
 
+请求时间：[2026-03-05 14:55:47]
+请求内容：10-3等于多少
+请求结果：Request failed. Status: 500. Response: {"error":{"message":"upstream error: do request failed (request id: 20260305145544367990231fE7eMs4v)","type":"new_api_error","param":"","code":"do_request_failed"}}
+
